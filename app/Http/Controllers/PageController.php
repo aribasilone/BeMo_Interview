@@ -14,6 +14,12 @@ class PageController extends Controller
         // Return pages
         return $pages;
     }
+
+    public function show($page_name){
+        $page = Page::where('page_name',$page_name)->firstOrFail();
+
+        return $page;
+    }
     
         /**
          * Store a newly created resource in storage.

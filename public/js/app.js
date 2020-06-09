@@ -1931,8 +1931,25 @@ __webpack_require__.r(__webpack_exports__);
     Footer: _Footer_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
     Scroll: _Scroll__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+  data: function data() {
+    return {
+      pixel: "//some script"
+    };
+  },
   mounted: function mounted() {
-    console.log('here');
+    // console.log('here');   
+    this.addPixel();
+  },
+  // created(){
+  //   this.addPixel();
+  // },
+  methods: {
+    addPixel: function addPixel() {
+      var script = document.createElement('script');
+      script.innerHTML = this.pixel; // Append script
+
+      document.getElementsByTagName('head')[0].appendChild(script);
+    }
   }
 });
 
@@ -1964,6 +1981,49 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     ContactBanner: _ContactBanner_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
     ContactForm: _ContactForm_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+  },
+  data: function data() {
+    return {
+      title: "",
+      descr: "",
+      indexable: 'noindex'
+    };
+  },
+  metaInfo: function metaInfo() {
+    return {
+      title: this.title,
+      meta: [{
+        name: 'description',
+        content: this.descr
+      }, {
+        name: 'robots',
+        content: this.indexable
+      }]
+    };
+  },
+  created: function created() {
+    this.updateMeta();
+  },
+  methods: {
+    updateMeta: function updateMeta() {
+      var _this = this;
+
+      fetch('api/page/contact-us').then(function (res) {
+        return res.json();
+      }).then(function (res) {
+        console.log(res);
+
+        if (res.indexable == 1 || res.indexable == true) {
+          _this.indexable = "all";
+        } else {
+          _this.indexable = "noindex";
+        }
+
+        console.log(_this.indexable);
+        _this.title = res.meta_title;
+        _this.descr = res.meta_descr;
+      });
+    }
   }
 });
 
@@ -2081,12 +2141,65 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Dash",
   data: function data() {
     return {
+      currentEditPage: '',
       page_name: '',
       indexable: false,
+      meta_title: '',
+      meta_descr: '',
+      fb_pixel: '',
+      google: '',
       pageObj: {
         page_name: '',
         indexable: false,
@@ -2100,29 +2213,59 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   created: function created() {
-    this.fetchPages();
+    this.checkRouter();
+  },
+  watch: {
+    '$route': 'checkRouter'
   },
   methods: {
-    fetchPages: function fetchPages() {
+    checkRouter: function checkRouter() {
       var _this = this;
 
-      fetch('/api/pages').then(function (res) {
+      //do for change in route
+      this.$nextTick(function () {
+        if (_this.$route.path == "/") {
+          _this.currentEditPage = "main";
+        } else {
+          _this.currentEditPage = "contact-us";
+        } //refresh dash for selected page
+
+
+        _this.fetchPages();
+      });
+    },
+    fetchPages: function fetchPages() {
+      var _this2 = this;
+
+      console.log(this.currentEditPage);
+      fetch("/api/page/".concat(this.currentEditPage)).then(function (res) {
         return res.json();
       }).then(function (res) {
-        console.log(res[0]);
-        _this.page_name = res[0].page_name;
+        console.log(res);
+        _this2.page_name = res.page_name;
 
-        if (res[0].indexable == 1 || res[0].indexable == true) {
-          _this.indexable = true;
+        if (res.indexable == 1 || res.indexable == true) {
+          _this2.indexable = true;
         } else {
-          _this.indexable = false;
+          _this2.indexable = false;
         }
+
+        _this2.meta_title = res.meta_title;
+        _this2.meta_descr = res.meta_descr;
       });
     },
     check: function check(e) {
       console.log(this.indexable, e);
+      this.compilePageObj();
+      this.putFunct();
+    },
+    compilePageObj: function compilePageObj() {
       this.pageObj.page_name = this.page_name;
       this.pageObj.indexable = this.indexable;
+      this.pageObj.meta_title = this.meta_title;
+      this.pageObj.meta_descr = this.meta_descr;
+    },
+    putFunct: function putFunct() {
       console.log(JSON.stringify(this.pageObj));
       fetch('/api/page', {
         method: 'put',
@@ -2137,6 +2280,21 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (err) {
         return console.log(err);
       });
+    },
+    reload4LiveView: function reload4LiveView() {
+      window.location.reload(true); //true arg to force it to go to server to get new stuff and not cache
+    },
+    buttonUp: function buttonUp() {
+      this.compilePageObj();
+      this.putFunct();
+      this.reload4LiveView();
+    },
+    updatePixels: function updatePixels() {
+      var appPageObj = {
+        page_name: "app",
+        fb_pixel: this.fb_pixel,
+        google: this.google
+      };
     }
   }
 });
@@ -2236,7 +2394,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       title: "",
-      desc: "",
+      descr: "",
       indexable: 'noindex'
     };
   },
@@ -2245,7 +2403,7 @@ __webpack_require__.r(__webpack_exports__);
       title: this.title,
       meta: [{
         name: 'description',
-        content: this.desc
+        content: this.descr
       }, {
         name: 'robots',
         content: this.indexable
@@ -2273,7 +2431,7 @@ __webpack_require__.r(__webpack_exports__);
 
         console.log(_this.indexable);
         _this.title = res[0].meta_title;
-        _this.desc = res[0].meta_desc;
+        _this.descr = res[0].meta_descr;
       });
     }
   }
@@ -2379,9 +2537,8 @@ __webpack_require__.r(__webpack_exports__);
 
       this.$nextTick(function () {
         _this.routeName = _this.$route.path;
-        _this.pathName = window.location.pathname;
-        console.log(_this.$route.path);
-        console.log(_this.pathName);
+        _this.pathName = window.location.pathname; // console.log(this.$route.path);
+        // console.log(this.pathName);
 
         if (_this.pathName == "/home") {
           document.getElementById("menuNav").style.position = "static";
@@ -7014,7 +7171,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.switch {\r\n  position: relative;\r\n  display: inline-block;\r\n  width: 60px;\r\n  height: 34px;\n}\n.switch input { \r\n  opacity: 0;\r\n  width: 0;\r\n  height: 0;\n}\n.slider {\r\n  position: absolute;\r\n  cursor: pointer;\r\n  top: 0;\r\n  left: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  border-radius: 34px;\r\n  background-color: #ccc;\r\n  transition: .4s;\n}\n.slider:before {\r\n  position: absolute;\r\n  content: \"\";\r\n  height: 26px;\r\n  width: 26px;\r\n  left: 4px;\r\n  bottom: 4px;\r\n  border-radius: 50%;\r\n  background-color: white;\r\n  transition: .4s;\n}\ninput:checked + .slider {\r\n  background-color: #2196F3;\n}\ninput:focus + .slider {\r\n  box-shadow: 0 0 1px #2196F3;\n}\ninput:checked + .slider:before {\r\n  transform: translateX(26px);\n}\r\n\r\n", ""]);
+exports.push([module.i, "\n.flex{\r\n  display:flex;\r\n  /* justify-content: space-between; */\r\n  color:rgb(20, 94, 155);\n}\n.labelLeft{\r\n  float:left;\r\n  min-width:20%;\n}\n.flexIn1{\r\n  float: right;\r\n  margin-left: 20%;\r\n  width:100%;\n}\n.flexIn2{\r\n  margin-left: 5%;\r\n  margin-right:5%;\n}\nbutton{\r\n  margin: 3% 0 5% 0;\r\n  border-color:#cccccc; \r\n  transition: 0.3s;\n}\nbutton:hover{\r\n  background:#145e9b;\r\n  border-color: #000000;\r\n  color:#FFFFFF;\r\n  font-weight:bold;\n}\n.switch {\r\n  position: relative;\r\n  /* display: inline-block; */\r\n  width: 60px;\r\n  height: 34px;\r\n  float:right;\r\n  margin-left: 20%;\n}\n.switch input { \r\n  opacity: 0;\r\n  width: 0;\r\n  height: 0;\n}\n.slider {\r\n  position: absolute;\r\n  cursor: pointer;\r\n  top: 0;\r\n  left: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  border-radius: 34px;\r\n  background-color: #ccc;\r\n  transition: .4s;\n}\n.slider:before {\r\n  position: absolute;\r\n  content: \"\";\r\n  height: 26px;\r\n  width: 26px;\r\n  left: 4px;\r\n  bottom: 4px;\r\n  border-radius: 50%;\r\n  background-color: white;\r\n  transition: .4s;\n}\ninput:checked + .slider {\r\n  background-color: #145e9b;\n}\ninput:focus + .slider {\r\n  box-shadow: 0 0 1px #145e9b;\n}\ninput:checked + .slider:before {\r\n  transform: translateX(26px);\n}\r\n\r\n", ""]);
 
 // exports
 
@@ -39119,6 +39276,279 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/vue-head/vue-head.js":
+/*!*******************************************!*\
+  !*** ./node_modules/vue-head/vue-head.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable */
+;(function() {
+
+  'use strict'
+
+  var opt = {
+    complement: window.document.title,
+    separator: '|'
+  }
+
+  var diffTitle = {}
+  var els = []
+  var diffEls = []
+  var installed = false
+
+  var util = {
+    /**
+     * Shorthand
+     * @type {Object}
+     */
+    shorthand: {
+      ch: 'charset',
+      tg: 'target',
+      n: 'name',
+      he: 'http-equiv',
+      ip: 'itemprop',
+      c: 'content',
+      p: 'property',
+      sc: 'scheme',
+      r: 'rel',
+      h: 'href',
+      sz: 'sizes',
+      t: 'type',
+      s: 'src',
+      a: 'async',
+      d: 'defer',
+      i: 'inner'
+    },
+
+    /**
+     * This function return the element <head>
+     * @type {Function}
+     * @return {Object}
+     */
+    getPlace: function (place) {
+      return window.document.getElementsByTagName(place)[0]
+    },
+
+    /**
+     * Undo the window.document title for previous state
+     * @type {Function}
+     * @param  {Object} state
+     */
+    undoTitle: function (state) {
+      if (!state.before) return
+      window.document.title = state.before
+    },
+
+    /**
+     * Undo elements to its previous state
+     * @type {Function}
+     */
+    undo: function () {
+      if (!els.length) return
+      els.forEach(function (el) {
+        el.parentElement.removeChild(el)
+      })
+      els = []
+    },
+
+    /**
+     * Set attributes in element
+     * @type {Function}
+     * @param  {Object} obj
+     * @param  {HTMLElement} el
+     * @return {HTMLElement} with defined attributes
+     */
+    prepareElement: function (obj, el) {
+      var self = this
+      Object.keys(obj).forEach(function (prop) {
+        var sh = self.shorthand[prop] || prop
+        if (sh.match(/(body|undo|replace)/g)) return
+        if (sh === 'inner') {
+          el.textContent = obj[prop]
+          return
+        }
+        el.setAttribute(sh, obj[prop])
+      })
+      return el
+    },
+
+    /**
+     * Change window.document title
+     * @type {Function}
+     * @param  {Object} obj
+     */
+    title: function (obj) {
+      if (!obj) return
+      diffTitle.before = opt.complement
+      var title = obj.inner + ' ' + (obj.separator || opt.separator) +
+        ' ' +  (obj.complement || opt.complement)
+      window.document.title = title.trim()
+    },
+
+    /**
+     * Update Element
+     */
+    update: function () {
+      if (!els.length) return
+      els.forEach(function(el, key) {
+        if (diffEls[key] && !diffEls[key].isEqualNode(el)) {
+          el.parentElement.replaceChild(diffEls[key], els[key])
+          els.splice(key, 1, diffEls[key])
+          return
+        }
+      })
+      diffEls = []
+    },
+
+    /**
+     * Add Elements
+     * @param {Object} obj
+     * @param {HTMLElement} el
+     * @param {HTMLElement} parent
+     */
+    add: function (obj, el, parent) {
+      parent.appendChild(el)
+      // Fixed elements that do not suffer removal
+      if (obj.undo !== undefined && !obj.undo) return
+      // Elements which are removed
+      els.push(el)
+    },
+
+    /**
+     * Handle of create elements
+     * @type {Function}
+     * @param  {Array} arr
+     * @param  {String} tag   - style, link, meta, script, base
+     * @param  {String} place - Default 'head'
+     * @param  {Boolean} update
+     */
+    handle: function (arr, tag, place, update) {
+      var self = this
+      if (!arr) return
+      arr.forEach(function (obj) {
+        var parent = (obj.body) ? self.getPlace('body') : self.getPlace(place)
+        var el = window.document.getElementById(obj.id)
+        if (!el) {
+          el = window.document.createElement(tag)
+          update = false
+        }
+        // Elements that will substitute data
+        if (el.hasAttribute('id')) {
+          self.prepareElement(obj, el)
+          return
+        }
+        // Other elements
+        el = self.prepareElement(obj, el)
+        // Updated elements
+        if (update) {
+          diffEls.push(el)
+          return
+        }
+        // Append Elements
+        self.add(obj, el, parent)
+      })
+    }
+  }
+
+  /**
+   * Plugin | vue-head
+   * @param  {Function} Vue
+   * @param  {Object} options
+   */
+  function VueHead (Vue, options) {
+    if (installed) return
+
+    installed = true
+
+    if (options) {
+      Vue.util.extend(opt, options)
+    }
+
+    /**
+     * Initializes and updates the elements in the head
+     * @param  {Boolean} update
+     */
+    function init (update) {
+      var self = this
+      var head = (typeof self.$options.head === 'function') ? self.$options.head.bind(self)() : self.$options.head
+      if (!head) return
+      Object.keys(head).forEach(function (key) {
+        var prop = head[key]
+        if (!prop) return
+        var obj = (typeof prop === 'function') ? head[key].bind(self)() : head[key]
+        if (key === 'title') {
+          util[key](obj)
+          return
+        }
+        util.handle(obj, key, 'head', update)
+      })
+      self.$emit('okHead')
+    }
+
+    /**
+     * Remove the meta tags elements in the head
+     */
+    function destroy () {
+      if (!this.$options.head) return
+      util.undoTitle(diffTitle)
+      util.undo()
+    }
+
+    // v1
+    if (Vue.version.match(/[1].(.)+/g)) {
+      Vue.mixin({
+        ready: function () {
+          init.call(this)
+        },
+        destroyed: function () {
+          destroy.call(this)
+        },
+        events: {
+          updateHead: function () {
+            init.call(this, true)
+            util.update()
+          }
+        }
+      })
+    }
+    // v2
+    if (Vue.version.match(/[2].(.)+/g)) {
+      Vue.mixin({
+        created: function () {
+          var self = this
+          self.$on('updateHead', function () {
+            init.call(this, true)
+            util.update()
+          })
+        },
+        mounted: function () {
+          init.call(this)
+        },
+        beforeDestroy: function () {
+          destroy.call(this)
+        }
+      })
+    }
+  }
+
+  VueHead.version = '2.2.0'
+
+  // auto install
+  if (typeof Vue !== 'undefined') {
+    Vue.use(VueHead)
+  }
+
+  if(true) {
+    module.exports = VueHead
+  } else {}
+
+})()
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=template&id=332fccf4&":
 /*!******************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/App.vue?vue&type=template&id=332fccf4& ***!
@@ -39377,11 +39807,14 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container" }, [
-    _c("h2", [_vm._v("Page Banner")]),
-    _vm._v(" "),
-    _c("label", [_vm._v("Change Image")]),
+    _c("h1", [_vm._v("Editing: " + _vm._s(_vm.currentEditPage))]),
     _vm._v(" "),
     _vm._m(0),
+    _c("br"),
+    _vm._v(" "),
+    _c("h2", [_vm._v("Page Banner")]),
+    _vm._v(" "),
+    _vm._m(1),
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
@@ -39389,70 +39822,118 @@ var render = function() {
     _vm._v(" "),
     _c("h2", [_vm._v("SEO - Meta Tags")]),
     _vm._v(" "),
-    _c("label", [_vm._v("Make Page Indexable")]),
+    _c("div", { staticClass: "flex" }, [
+      _c("label", { staticClass: "labelLeft" }, [
+        _vm._v("Make Page Indexable")
+      ]),
+      _vm._v(" "),
+      _c("label", { staticClass: "switch" }, [
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.indexable,
+              expression: "indexable"
+            }
+          ],
+          attrs: { type: "checkbox" },
+          domProps: {
+            checked: Array.isArray(_vm.indexable)
+              ? _vm._i(_vm.indexable, null) > -1
+              : _vm.indexable
+          },
+          on: {
+            change: [
+              function($event) {
+                var $$a = _vm.indexable,
+                  $$el = $event.target,
+                  $$c = $$el.checked ? true : false
+                if (Array.isArray($$a)) {
+                  var $$v = null,
+                    $$i = _vm._i($$a, $$v)
+                  if ($$el.checked) {
+                    $$i < 0 && (_vm.indexable = $$a.concat([$$v]))
+                  } else {
+                    $$i > -1 &&
+                      (_vm.indexable = $$a
+                        .slice(0, $$i)
+                        .concat($$a.slice($$i + 1)))
+                  }
+                } else {
+                  _vm.indexable = $$c
+                }
+              },
+              function($event) {
+                return _vm.check($event)
+              }
+            ]
+          }
+        }),
+        _vm._v(" "),
+        _c("span", { staticClass: "slider round" })
+      ])
+    ]),
     _vm._v(" "),
-    _c("label", { staticClass: "switch" }, [
+    _c("br"),
+    _vm._v(" "),
+    _c("div", { staticClass: "flex" }, [
+      _c("label", { staticClass: "labelLeft" }, [_vm._v("Title")]),
+      _vm._v(" "),
       _c("input", {
         directives: [
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.indexable,
-            expression: "indexable"
+            value: _vm.meta_title,
+            expression: "meta_title"
           }
         ],
-        attrs: { type: "checkbox" },
-        domProps: {
-          checked: Array.isArray(_vm.indexable)
-            ? _vm._i(_vm.indexable, null) > -1
-            : _vm.indexable
-        },
+        staticClass: "flexIn1",
+        attrs: { type: "text" },
+        domProps: { value: _vm.meta_title },
         on: {
-          change: [
-            function($event) {
-              var $$a = _vm.indexable,
-                $$el = $event.target,
-                $$c = $$el.checked ? true : false
-              if (Array.isArray($$a)) {
-                var $$v = null,
-                  $$i = _vm._i($$a, $$v)
-                if ($$el.checked) {
-                  $$i < 0 && (_vm.indexable = $$a.concat([$$v]))
-                } else {
-                  $$i > -1 &&
-                    (_vm.indexable = $$a
-                      .slice(0, $$i)
-                      .concat($$a.slice($$i + 1)))
-                }
-              } else {
-                _vm.indexable = $$c
-              }
-            },
-            function($event) {
-              return _vm.check($event)
+          input: function($event) {
+            if ($event.target.composing) {
+              return
             }
-          ]
+            _vm.meta_title = $event.target.value
+          }
         }
-      }),
-      _vm._v(" "),
-      _c("span", { staticClass: "slider round" })
+      })
     ]),
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
-    _c("label", [_vm._v("Title")]),
+    _c("div", { staticClass: "flex" }, [
+      _c("label", { staticClass: "labelLeft" }, [_vm._v("Description")]),
+      _vm._v(" "),
+      _c("textarea", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.meta_descr,
+            expression: "meta_descr"
+          }
+        ],
+        staticClass: "flexIn1",
+        attrs: { row: "5", col: "38" },
+        domProps: { value: _vm.meta_descr },
+        on: {
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.meta_descr = $event.target.value
+          }
+        }
+      })
+    ]),
     _vm._v(" "),
-    _c("input", { attrs: { type: "text" } }),
-    _vm._v(" "),
-    _c("br"),
-    _vm._v(" "),
-    _c("label", [_vm._v("Description")]),
-    _vm._v(" "),
-    _c("textarea", { attrs: { row: "5", col: "38" } }),
-    _vm._v(" "),
-    _c("br"),
-    _vm._v(" "),
-    _c("button", [_vm._v("Update Meta Title/Description")]),
+    _c("button", { on: { click: _vm.buttonUp } }, [
+      _vm._v("Update Meta Title/Description")
+    ]),
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
@@ -39460,13 +39941,57 @@ var render = function() {
     _vm._v(" "),
     _c("h2", [_vm._v("Marketing and Analytics")]),
     _vm._v(" "),
-    _c("label", [_vm._v("Facebook Pixel Code")]),
+    _c("div", { staticClass: "flex" }, [
+      _c("label", [_vm._v("Facebook Pixel Code")]),
+      _vm._v(" "),
+      _c("textarea", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.fb_pixel,
+            expression: "fb_pixel"
+          }
+        ],
+        staticClass: "flexIn2",
+        domProps: { value: _vm.fb_pixel },
+        on: {
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.fb_pixel = $event.target.value
+          }
+        }
+      }),
+      _vm._v(" "),
+      _c("label", [_vm._v("Google")]),
+      _vm._v(" "),
+      _c("textarea", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.google,
+            expression: "google"
+          }
+        ],
+        staticClass: "flexIn2",
+        domProps: { value: _vm.google },
+        on: {
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.google = $event.target.value
+          }
+        }
+      })
+    ]),
     _vm._v(" "),
-    _c("textarea"),
-    _vm._v(" "),
-    _c("label", [_vm._v("Google")]),
-    _vm._v(" "),
-    _c("textarea"),
+    _c("button", { on: { click: _vm.buttonUp } }, [
+      _vm._v("Update Pixel/Analytics")
+    ]),
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
@@ -39482,14 +40007,30 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("select", { attrs: { name: "cars", id: "cars" } }, [
-      _c("option", { attrs: { value: "volvo" } }, [_vm._v("A")]),
+    return _c("p", [
+      _c("b", [
+        _vm._v(
+          '**to change page: scroll to bottom to "Live view" and hit the desired page link in the navigation bar'
+        )
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "flex" }, [
+      _c("label", { staticClass: "labelLeft" }, [_vm._v("Change Image")]),
       _vm._v(" "),
-      _c("option", { attrs: { value: "saab" } }, [_vm._v("B")]),
-      _vm._v(" "),
-      _c("option", { attrs: { value: "mercedes" } }, [_vm._v("C")]),
-      _vm._v(" "),
-      _c("option", { attrs: { value: "audi" } }, [_vm._v("D")])
+      _c("select", { staticClass: "flexIn1" }, [
+        _c("option", { attrs: { value: "" } }, [_vm._v("A")]),
+        _vm._v(" "),
+        _c("option", { attrs: { value: "" } }, [_vm._v("B")]),
+        _vm._v(" "),
+        _c("option", { attrs: { value: "" } }, [_vm._v("C")]),
+        _vm._v(" "),
+        _c("option", { attrs: { value: "" } }, [_vm._v("D")])
+      ])
     ])
   }
 ]
@@ -57513,6 +58054,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js");
 /* harmony import */ var _components_Dash_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/Dash.vue */ "./resources/js/components/Dash.vue");
 /* harmony import */ var vue_meta__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! vue-meta */ "./node_modules/vue-meta/dist/vue-meta.esm.js");
+/* harmony import */ var vue_head__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! vue-head */ "./node_modules/vue-head/vue-head.js");
+/* harmony import */ var vue_head__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(vue_head__WEBPACK_IMPORTED_MODULE_6__);
+
 
 
 
@@ -57552,6 +58096,7 @@ Vue.component('Dash', _components_Dash_vue__WEBPACK_IMPORTED_MODULE_4__["default
 
 Vue.use(vue_router__WEBPACK_IMPORTED_MODULE_3__["default"]);
 Vue.use(vue_meta__WEBPACK_IMPORTED_MODULE_5__["default"]);
+Vue.use(vue_head__WEBPACK_IMPORTED_MODULE_6___default.a);
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_3__["default"]({
   routes: [{
     path: '/',
@@ -58048,14 +58593,15 @@ __webpack_require__.r(__webpack_exports__);
 /*!******************************************!*\
   !*** ./resources/js/components/Dash.vue ***!
   \******************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Dash_vue_vue_type_template_id_0cf04d7d___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Dash.vue?vue&type=template&id=0cf04d7d& */ "./resources/js/components/Dash.vue?vue&type=template&id=0cf04d7d&");
 /* harmony import */ var _Dash_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Dash.vue?vue&type=script&lang=js& */ "./resources/js/components/Dash.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _Dash_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Dash.vue?vue&type=style&index=0&lang=css& */ "./resources/js/components/Dash.vue?vue&type=style&index=0&lang=css&");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Dash_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Dash_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _Dash_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Dash.vue?vue&type=style&index=0&lang=css& */ "./resources/js/components/Dash.vue?vue&type=style&index=0&lang=css&");
 /* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
@@ -58087,7 +58633,7 @@ component.options.__file = "resources/js/components/Dash.vue"
 /*!*******************************************************************!*\
   !*** ./resources/js/components/Dash.vue?vue&type=script&lang=js& ***!
   \*******************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -89,8 +89,8 @@ export default {
             this.$nextTick(() => {
                 this.routeName = this.$route.path;
                 this.pathName = window.location.pathname;
-                console.log(this.$route.path);
-                console.log(this.pathName);
+                // console.log(this.$route.path);
+                // console.log(this.pathName);
                 if(this.pathName=="/home"){
                     document.getElementById("menuNav").style.position="static";
                 }else{

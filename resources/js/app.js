@@ -4,6 +4,7 @@ import ContactUs from './components/ContactUs.vue'
 import VueRouter from 'vue-router'
 import Dash from './components/Dash.vue'
 import VueMeta from 'vue-meta'
+import VueHead from 'vue-head'
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -42,6 +43,7 @@ Vue.component('Dash', Dash);
 
 Vue.use(VueRouter);
 Vue.use(VueMeta);
+Vue.use(VueHead);
 
 const router = new VueRouter({
     routes: [

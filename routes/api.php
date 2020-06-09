@@ -20,4 +20,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('pages', 'PageController@index');
 
+Route::get('page/{page_name}', 'PageController@show');
+
 Route::put('page', 'PageController@store');

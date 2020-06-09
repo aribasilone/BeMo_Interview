@@ -26,7 +26,7 @@ export default {
   data(){
     return{
       title:"",
-      desc:"",
+      descr:"",
       indexable: 'noindex',
       
     }
@@ -36,7 +36,7 @@ export default {
     return { 
       title: this.title,
       meta: [
-        { name: 'description', content: this.desc},   
+        { name: 'description', content: this.descr},   
         { name: 'robots', content: this.indexable} 
       ]
     }
@@ -59,7 +59,7 @@ export default {
         console.log(this.indexable);
 
         this.title = res[0].meta_title;
-        this.desc = res[0].meta_desc;
+        this.descr = res[0].meta_descr;
 
       });
     }

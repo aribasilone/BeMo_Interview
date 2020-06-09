@@ -2,10 +2,10 @@
   <div id="appall">
     <Nav/>
     <router-view/>
-    <!-- <h1>Test something</h1> -->
     <Footer/>
     <Scroll/>
   </div>
+  
 </template>
 
 <script>
@@ -21,9 +21,31 @@ export default {
     Scroll
   },
 
+  data(){
+    return{
+      pixel:"//some script"
+    }
+  },
+
   mounted(){
-    console.log('here');    
+    // console.log('here');   
+    this.addPixel(); 
+  },
+
+  // created(){
+  //   this.addPixel();
+  // },
+
+  methods:{
+    addPixel(){
+    let script = document.createElement('script');
+    script.innerHTML=this.pixel;
+    // Append script
+    
+    document.getElementsByTagName('head')[0].appendChild(script);
+    }
   }
+  
 }
 </script>
 
