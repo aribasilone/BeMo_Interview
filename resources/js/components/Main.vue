@@ -22,16 +22,47 @@ export default {
     GuideOverview,
     GuidePurpose
   },
+
+  data(){
+    return{
+      title:"",
+      desc:"",
+      indexable: 'noindex',
+      
+    }
+  },
   
   metaInfo() {
     return { 
-      title: "",
+      title: this.title,
       meta: [
-        { name: 'description', content: ''},   
-        { name: 'robots', content: 'noindex'} 
+        { name: 'description', content: this.desc},   
+        { name: 'robots', content: this.indexable} 
       ]
     }
-  }
+  },
   // https://medium.com/js-dojo/how-to-add-dynamic-meta-tags-to-your-vue-js-app-for-google-seo-b827e8c84ee9
+
+  created(){
+    this.updateMeta();
+  },
+
+  methods:{
+    updateMeta(){
+      fetch('api/pages').then(res=>res.json()).then(res =>{
+        console.log(res[0]);
+        if(res[0].indexable==1 ||res[0].indexable==true ){
+          this.indexable="all";
+        }else{
+          this.indexable="noindex";
+        }
+        console.log(this.indexable);
+
+        this.title = res[0].meta_title;
+        this.desc = res[0].meta_desc;
+
+      });
+    }
+  }
 }
 </script>

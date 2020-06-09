@@ -2075,8 +2075,70 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  name: "Dash"
+  name: "Dash",
+  data: function data() {
+    return {
+      page_name: '',
+      indexable: false,
+      pageObj: {
+        page_name: '',
+        indexable: false,
+        image_name: '',
+        meta_title: '',
+        meta_descr: '',
+        fb_pixel: '',
+        google: '',
+        contact_email: ''
+      }
+    };
+  },
+  created: function created() {
+    this.fetchPages();
+  },
+  methods: {
+    fetchPages: function fetchPages() {
+      var _this = this;
+
+      fetch('/api/pages').then(function (res) {
+        return res.json();
+      }).then(function (res) {
+        console.log(res[0]);
+        _this.page_name = res[0].page_name;
+
+        if (res[0].indexable == 1 || res[0].indexable == true) {
+          _this.indexable = true;
+        } else {
+          _this.indexable = false;
+        }
+      });
+    },
+    check: function check(e) {
+      console.log(this.indexable, e);
+      this.pageObj.page_name = this.page_name;
+      this.pageObj.indexable = this.indexable;
+      console.log(JSON.stringify(this.pageObj));
+      fetch('/api/page', {
+        method: 'put',
+        body: JSON.stringify(this.pageObj),
+        headers: {
+          'content-type': 'application/json'
+        }
+      }).then(function (res) {
+        return res.json();
+      }).then(function (res) {
+        console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -2171,19 +2233,50 @@ __webpack_require__.r(__webpack_exports__);
     GuideOverview: _GuideOverview__WEBPACK_IMPORTED_MODULE_1__["default"],
     GuidePurpose: _GuidePurpose__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
-  metaInfo: function metaInfo() {
+  data: function data() {
     return {
       title: "",
+      desc: "",
+      indexable: 'noindex'
+    };
+  },
+  metaInfo: function metaInfo() {
+    return {
+      title: this.title,
       meta: [{
         name: 'description',
-        content: ''
+        content: this.desc
       }, {
         name: 'robots',
-        content: 'noindex'
+        content: this.indexable
       }]
     };
-  } // https://medium.com/js-dojo/how-to-add-dynamic-meta-tags-to-your-vue-js-app-for-google-seo-b827e8c84ee9
+  },
+  // https://medium.com/js-dojo/how-to-add-dynamic-meta-tags-to-your-vue-js-app-for-google-seo-b827e8c84ee9
+  created: function created() {
+    this.updateMeta();
+  },
+  methods: {
+    updateMeta: function updateMeta() {
+      var _this = this;
 
+      fetch('api/pages').then(function (res) {
+        return res.json();
+      }).then(function (res) {
+        console.log(res[0]);
+
+        if (res[0].indexable == 1 || res[0].indexable == true) {
+          _this.indexable = "all";
+        } else {
+          _this.indexable = "noindex";
+        }
+
+        console.log(_this.indexable);
+        _this.title = res[0].meta_title;
+        _this.desc = res[0].meta_desc;
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -39283,71 +39376,120 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div", { staticClass: "container" }, [
+    _c("h2", [_vm._v("Page Banner")]),
+    _vm._v(" "),
+    _c("label", [_vm._v("Change Image")]),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("h2", [_vm._v("SEO - Meta Tags")]),
+    _vm._v(" "),
+    _c("label", [_vm._v("Make Page Indexable")]),
+    _vm._v(" "),
+    _c("label", { staticClass: "switch" }, [
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.indexable,
+            expression: "indexable"
+          }
+        ],
+        attrs: { type: "checkbox" },
+        domProps: {
+          checked: Array.isArray(_vm.indexable)
+            ? _vm._i(_vm.indexable, null) > -1
+            : _vm.indexable
+        },
+        on: {
+          change: [
+            function($event) {
+              var $$a = _vm.indexable,
+                $$el = $event.target,
+                $$c = $$el.checked ? true : false
+              if (Array.isArray($$a)) {
+                var $$v = null,
+                  $$i = _vm._i($$a, $$v)
+                if ($$el.checked) {
+                  $$i < 0 && (_vm.indexable = $$a.concat([$$v]))
+                } else {
+                  $$i > -1 &&
+                    (_vm.indexable = $$a
+                      .slice(0, $$i)
+                      .concat($$a.slice($$i + 1)))
+                }
+              } else {
+                _vm.indexable = $$c
+              }
+            },
+            function($event) {
+              return _vm.check($event)
+            }
+          ]
+        }
+      }),
+      _vm._v(" "),
+      _c("span", { staticClass: "slider round" })
+    ]),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("label", [_vm._v("Title")]),
+    _vm._v(" "),
+    _c("input", { attrs: { type: "text" } }),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("label", [_vm._v("Description")]),
+    _vm._v(" "),
+    _c("textarea", { attrs: { row: "5", col: "38" } }),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("button", [_vm._v("Update Meta Title/Description")]),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("h2", [_vm._v("Marketing and Analytics")]),
+    _vm._v(" "),
+    _c("label", [_vm._v("Facebook Pixel Code")]),
+    _vm._v(" "),
+    _c("textarea"),
+    _vm._v(" "),
+    _c("label", [_vm._v("Google")]),
+    _vm._v(" "),
+    _c("textarea"),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _c("h2", [_vm._v("Contact Email")]),
+    _vm._v(" "),
+    _c("input", { attrs: { type: "text" } }),
+    _vm._v(" "),
+    _c("button", [_vm._v("Update Email")])
+  ])
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("label", [_vm._v("Make Page Indexable")]),
+    return _c("select", { attrs: { name: "cars", id: "cars" } }, [
+      _c("option", { attrs: { value: "volvo" } }, [_vm._v("A")]),
       _vm._v(" "),
-      _c("label", { staticClass: "switch" }, [
-        _c("input", { attrs: { type: "checkbox" } }),
-        _vm._v(" "),
-        _c("span", { staticClass: "slider round" })
-      ]),
+      _c("option", { attrs: { value: "saab" } }, [_vm._v("B")]),
       _vm._v(" "),
-      _c("br"),
+      _c("option", { attrs: { value: "mercedes" } }, [_vm._v("C")]),
       _vm._v(" "),
-      _c("label", [_vm._v("Change Image")]),
-      _vm._v(" "),
-      _c("select", { attrs: { name: "cars", id: "cars" } }, [
-        _c("option", { attrs: { value: "volvo" } }, [_vm._v("A")]),
-        _vm._v(" "),
-        _c("option", { attrs: { value: "saab" } }, [_vm._v("B")]),
-        _vm._v(" "),
-        _c("option", { attrs: { value: "mercedes" } }, [_vm._v("C")]),
-        _vm._v(" "),
-        _c("option", { attrs: { value: "audi" } }, [_vm._v("D")])
-      ]),
-      _vm._v(" "),
-      _c("br"),
-      _vm._v(" "),
-      _c("h2", [_vm._v("SEO - Meta Tags")]),
-      _vm._v(" "),
-      _c("label", [_vm._v("Title")]),
-      _vm._v(" "),
-      _c("input", { attrs: { type: "text" } }),
-      _vm._v(" "),
-      _c("br"),
-      _vm._v(" "),
-      _c("label", [_vm._v("Description")]),
-      _vm._v(" "),
-      _c("textarea", { attrs: { row: "5", col: "38" } }),
-      _vm._v(" "),
-      _c("br"),
-      _vm._v(" "),
-      _c("button", [_vm._v("Update Meta")]),
-      _vm._v(" "),
-      _c("br"),
-      _vm._v(" "),
-      _c("h2", [_vm._v("Marketing and Analytics")]),
-      _vm._v(" "),
-      _c("label", [_vm._v("Facebook Pixel Code")]),
-      _vm._v(" "),
-      _c("textarea"),
-      _vm._v(" "),
-      _c("label", [_vm._v("Google")]),
-      _vm._v(" "),
-      _c("br"),
-      _vm._v(" "),
-      _c("h2", [_vm._v("Contact Email")]),
-      _vm._v(" "),
-      _c("input", { attrs: { type: "text" } }),
-      _vm._v(" "),
-      _c("button", [_vm._v("Update Email")])
+      _c("option", { attrs: { value: "audi" } }, [_vm._v("D")])
     ])
   }
 ]
