@@ -18,8 +18,8 @@
 </template>
 
 <style scoped>
-#menuNav{
-    position: fixed;
+#menuNav{    
+    position: fixed; 
     top:0;
     z-index: 2;
 
@@ -75,7 +75,8 @@ export default {
         return {
             routeName: null,
             styleid1: null,
-            styleid2: null
+            styleid2: null,
+            pathName: null,
         };
     },
 
@@ -86,8 +87,16 @@ export default {
     methods: {
         currentRoute() {
             this.$nextTick(() => {
-                this.routeName = this.$route.path
+                this.routeName = this.$route.path;
+                this.pathName = window.location.pathname;
                 console.log(this.$route.path);
+                console.log(this.pathName);
+                if(this.pathName=="/home"){
+                    document.getElementById("menuNav").style.position="static";
+                }else{
+                   document.getElementById("menuNav").style.position="fixed";
+                }
+
                 if(this.routeName=="/contact-us"){
                     this.styleid1="";
                     this.styleid2='currentPage';

@@ -2,6 +2,8 @@ import App from './components/App.vue'
 import Main from './components/Main.vue'
 import ContactUs from './components/ContactUs.vue'
 import VueRouter from 'vue-router'
+import Dash from './components/Dash.vue'
+import VueMeta from 'vue-meta'
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -28,6 +30,7 @@ window.Vue = require('vue');
 Vue.component('App', App);
 Vue.component('Main', Main);
 Vue.component('ContactUs', ContactUs);
+Vue.component('Dash', Dash);
 
 // Vue.component('Footer', require('./components/Footer.vue'));
 
@@ -37,7 +40,8 @@ Vue.component('ContactUs', ContactUs);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
+Vue.use(VueMeta);
 
 const router = new VueRouter({
     routes: [
